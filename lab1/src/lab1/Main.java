@@ -1,11 +1,13 @@
+package lab1;
+
 import java.util.Arrays; // for main3
 
 public class Main {
     public static void main(String[] args) {
-        main1(args);
-        main2(args);
-        main3(args);
-        main4(args);
+//        main1(args);
+//        main2(args);
+//        main3(args);
+//        main4(args);
         main5(args);
     }
 
