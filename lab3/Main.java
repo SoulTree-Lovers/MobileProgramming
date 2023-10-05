@@ -220,9 +220,16 @@ public class Main {
         return ch;
     }
     public static void main(String[] args) throws Exception {
+        // Rotate 키 처리 (v9)
+        boolean rotateNeeded = false; // rotate 키가 입력 되었을 경우 true
+        int idxBlockDegree = 0; // 초기 degree의 값은 0으로 설정 (0도 회전한 모양)
+
         // 7가지 블록 무작위 선택 (v8)
         int idxBlockType = random.nextInt(7); // 0~6 정수 랜덤 선택
-        int[][] arrayBlk = setOfBlockArrays[idxBlockType][0]; // 랜덤하게 블록 선택 (블록의 모양(degree)은 첫 번째 모양으로 선택)
+        int[][] arrayBlk = setOfBlockArrays[idxBlockType][idxBlockDegree]; // 랜덤하게 블록 선택 (블록의 모양(degree)은 첫 번째 모양으로 선택)
+
+
+
 
         boolean newBlockNeeded = false;
         int top = 0;
@@ -244,10 +251,20 @@ public class Main {
                 case 'a': left--; break; // move left
                 case 'd': left++; break; // move right
                 case 's': top++; break; // move down
-                case 'w': break; // rotate the block clockwise
+                case 'w': rotateNeeded = true; break; // rotate the block clockwise
                 case ' ': break; // drop the block
                 default: System.out.println("unknown key!");
             }
+
+            // w키를 입력한 경우 90도 회전된 모양으로 변경
+            if (rotateNeeded == true) {
+                rotateNeeded = false; // rotateNeeded 변수값 다시 false로 변경
+                idxBlockDegree = (idxBlockDegree + 1) % 4; // 90도 회전 (0~3 범위 안에서 인덱스 1증가)
+                arrayBlk = setOfBlockArrays[idxBlockType][idxBlockDegree]; // 블록 다시 선택
+                currBlk =  new Matrix(arrayBlk); // currBlk 객체 다시 할당
+            }
+
+
             tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
             tempBlk = tempBlk.add(currBlk);
             if (tempBlk.anyGreaterThan(1)) {
@@ -267,7 +284,7 @@ public class Main {
             if (newBlockNeeded) {
                 // 7가지 블록 무작위 선택 (v8)
                 idxBlockType = random.nextInt(7); // 0~6 정수 랜덤 선택
-                arrayBlk = setOfBlockArrays[idxBlockType][0]; // 랜덤하게 블록 선택 (블록의 모양(degree)은 첫 번째 모양으로 선택)
+                arrayBlk = setOfBlockArrays[idxBlockType][idxBlockDegree]; // 랜덤하게 블록 선택 (블록의 모양(degree)은 첫 번째 모양으로 선택)
 
                 iScreen = new Matrix(oScreen);
                 top = 0; left = iScreenDw + iScreenDx/2 - 2;
