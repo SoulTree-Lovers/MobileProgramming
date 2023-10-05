@@ -1,14 +1,176 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Random;
 
 public class Main {
-    static int[][] arrayBlk = {
-            { 0, 0, 1, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 1, 0 },
-    };
+    static Random random = new Random(); // Random 객체 생성
+//    private static int idxBlockType = random.nextInt(7); // 0~6 정수 랜덤 선택
+
+    private static int[][][][] setOfBlockArrays = { // [7][4][?][?]
+            {
+                    {
+                            { 1, 1 },
+                            { 1, 1 }
+                    },
+                    {
+                            { 1, 1 },
+                            { 1, 1 }
+                    },
+                    {
+                            { 1, 1 },
+                            { 1, 1 }
+                    },
+                    {
+                            { 1, 1 },
+                            { 1, 1 }
+                    }
+            },
+            {
+                    {
+                            {0, 1, 0},
+                            {1, 1, 1},
+                            {0, 0, 0},
+                    },
+                    {
+                            {0, 1, 0},
+                            {0, 1, 1},
+                            {0, 1, 0},
+                    },
+                    {
+                            {0, 0, 0},
+                            {1, 1, 1},
+                            {0, 1, 0},
+                    },
+                    {
+                            {0, 1, 0},
+                            {1, 1, 0},
+                            {0, 1, 0},
+                    },
+            },
+            {
+                    {
+                            {1, 0, 0},
+                            {1, 1, 1},
+                            {0, 0, 0},
+                    },
+                    {
+                            {0, 1, 1},
+                            {0, 1, 0},
+                            {0, 1, 0},
+                    },
+                    {
+                            {0, 0, 0},
+                            {1, 1, 1},
+                            {0, 0, 1},
+                    },
+                    {
+                            {0, 1, 0},
+                            {0, 1, 0},
+                            {1, 1, 0},
+                    },
+            },
+            {
+                    {
+                            {0, 0, 1},
+                            {1, 1, 1},
+                            {0, 0, 0},
+                    },
+                    {
+                            {0, 1, 0},
+                            {0, 1, 0},
+                            {0, 1, 1},
+                    },
+                    {
+                            {0, 0, 0},
+                            {1, 1, 1},
+                            {1, 0, 0},
+                    },
+                    {
+                            {1, 1, 0},
+                            {0, 1, 0},
+                            {0, 1, 0},
+                    },
+            },
+            {
+                    {
+                            {0, 1, 0},
+                            {1, 1, 0},
+                            {1, 0, 0},
+                    },
+                    {
+                            {1, 1, 0},
+                            {0, 1, 1},
+                            {0, 0, 0},
+                    },
+                    {
+                            {0, 1, 0},
+                            {1, 1, 0},
+                            {1, 0, 0},
+                    },
+                    {
+                            {1, 1, 0},
+                            {0, 1, 1},
+                            {0, 0, 0},
+                    },
+            },
+            {
+                    {
+                            {0, 1, 0},
+                            {0, 1, 1},
+                            {0, 0, 1},
+                    },
+                    {
+                            {0, 0, 0},
+                            {0, 1, 1},
+                            {1, 1, 0},
+                    },
+                    {
+                            {0, 1, 0},
+                            {0, 1, 1},
+                            {0, 0, 1},
+                    },
+                    {
+                            {0, 0, 0},
+                            {0, 1, 1},
+                            {1, 1, 0},
+                    },
+            },
+            {
+                    {
+                            {0, 0, 0, 0},
+                            {1, 1, 1, 1},
+                            {0, 0, 0, 0},
+                            {0, 0, 0, 0},
+                    },
+                    {
+                            {0, 1, 0, 0},
+                            {0, 1, 0, 0},
+                            {0, 1, 0, 0},
+                            {0, 1, 0, 0},
+                    },
+                    {
+                            {0, 0, 0, 0},
+                            {1, 1, 1, 1},
+                            {0, 0, 0, 0},
+                            {0, 0, 0, 0},
+                    },
+                    {
+                            {0, 1, 0, 0},
+                            {0, 1, 0, 0},
+                            {0, 1, 0, 0},
+                            {0, 1, 0, 0},
+                    },
+            },
+    }; // end of setOfBlockArrays
+
+    // 일자 블록 (임시 테스트용)
+//    static int[][] arrayBlk = {
+//            { 0, 0, 1, 0 },
+//            { 0, 0, 1, 0 },
+//            { 0, 0, 1, 0 },
+//            { 0, 0, 1, 0 },
+//    };
     private static int iScreenDy = 15;
     private static int iScreenDx = 10;
     private static int iScreenDw = 4; // large enough to cover the largest block
@@ -58,11 +220,18 @@ public class Main {
         return ch;
     }
     public static void main(String[] args) throws Exception {
+        // 7가지 블록 무작위 선택 (v8)
+        int idxBlockType = random.nextInt(7); // 0~6 정수 랜덤 선택
+        int[][] arrayBlk = setOfBlockArrays[idxBlockType][0]; // 랜덤하게 블록 선택 (블록의 모양(degree)은 첫 번째 모양으로 선택)
+
         boolean newBlockNeeded = false;
         int top = 0;
         int left = iScreenDw + iScreenDx/2 - 2;
         int[][] arrayScreen = createArrayScreen(iScreenDy, iScreenDx, iScreenDw);
         char key;
+
+
+
         Matrix iScreen = new Matrix(arrayScreen);
         Matrix currBlk = new Matrix(arrayBlk);
         Matrix tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
@@ -96,6 +265,10 @@ public class Main {
             oScreen.paste(tempBlk, top, left);
             drawMatrix(oScreen); System.out.println();
             if (newBlockNeeded) {
+                // 7가지 블록 무작위 선택 (v8)
+                idxBlockType = random.nextInt(7); // 0~6 정수 랜덤 선택
+                arrayBlk = setOfBlockArrays[idxBlockType][0]; // 랜덤하게 블록 선택 (블록의 모양(degree)은 첫 번째 모양으로 선택)
+
                 iScreen = new Matrix(oScreen);
                 top = 0; left = iScreenDw + iScreenDx/2 - 2;
                 newBlockNeeded = false;
