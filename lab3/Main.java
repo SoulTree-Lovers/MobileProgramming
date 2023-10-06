@@ -4,11 +4,11 @@ import java.io.InputStreamReader;
 import java.util.Random;
 
 public class Main {
-    static Random random = new Random(); // Random 객체 생성
-//    private static int idxBlockType = random.nextInt(7); // 0~6 정수 랜덤 선택
+    static Random random = new Random(); // Random 객체 생성 (초기 한 번만 선언)
 
     private static int[][][][] setOfBlockArrays = { // [7][4][?][?]
             {
+                // 네모 블록
                     {
                             { 1, 1 },
                             { 1, 1 }
@@ -27,6 +27,7 @@ public class Main {
                     }
             },
             {
+                // ㅗ자 블록
                     {
                             {0, 1, 0},
                             {1, 1, 1},
@@ -49,6 +50,7 @@ public class Main {
                     },
             },
             {
+                // ㄴ자 블록 1
                     {
                             {1, 0, 0},
                             {1, 1, 1},
@@ -71,6 +73,7 @@ public class Main {
                     },
             },
             {
+                // ㄴ자 블록 2
                     {
                             {0, 0, 1},
                             {1, 1, 1},
@@ -93,6 +96,7 @@ public class Main {
                     },
             },
             {
+                // ㄹ자 블록 1
                     {
                             {0, 1, 0},
                             {1, 1, 0},
@@ -115,6 +119,7 @@ public class Main {
                     },
             },
             {
+                // ㄹ자 블록 2
                     {
                             {0, 1, 0},
                             {0, 1, 1},
@@ -137,6 +142,7 @@ public class Main {
                     },
             },
             {
+                // ㅡ자 블록
                     {
                             {0, 0, 0, 0},
                             {1, 1, 1, 1},
@@ -164,13 +170,6 @@ public class Main {
             },
     }; // end of setOfBlockArrays
 
-    // 일자 블록 (임시 테스트용)
-//    static int[][] arrayBlk = {
-//            { 0, 0, 1, 0 },
-//            { 0, 0, 1, 0 },
-//            { 0, 0, 1, 0 },
-//            { 0, 0, 1, 0 },
-//    };
     private static int iScreenDy = 15;
     private static int iScreenDx = 10;
     private static int iScreenDw = 4; // large enough to cover the largest block
@@ -219,6 +218,8 @@ public class Main {
         nKeys--;
         return ch;
     }
+
+    // [v10]까지 구현
     public static void main(String[] args) throws Exception {
         // Rotate 키 처리: 블록 회전 (v9)
         boolean rotateNeeded = false; // rotate(w) 키가 입력되었을 경우 true
@@ -231,7 +232,9 @@ public class Main {
         // Space 키 처리: 블록 추락 (v10)
         boolean inputSpace = false; // space 키가 입력되었을 경우 true
 
-
+        // Full line 삭제 처리 (v11)
+        boolean inputS = false; // down 키가 입력되었을 경우 true
+        boolean checkFullLine = false;
 
         boolean newBlockNeeded = false;
         int top = 0;
@@ -248,6 +251,7 @@ public class Main {
         Matrix oScreen = new Matrix(iScreen);
         oScreen.paste(tempBlk, top, left);
         drawMatrix(oScreen); System.out.println();
+
         while ((key = getKey()) != 'q') {
             switch(key) {
                 case 'a': left--; break; // move left
@@ -258,10 +262,10 @@ public class Main {
                 default: System.out.println("unknown key!");
             }
 
-            // w키를 입력한 경우 90도 회전된 모양으로 변경
+            // w키를 입력한 경우 90도 회전된 모양으로 변경 (v9)
             if (rotateNeeded == true) {
                 rotateNeeded = false; // rotateNeeded 변수값 다시 false로 변경
-                int tempDegree = idxBlockDegree;
+                int tempDegree = idxBlockDegree; // 원래 degree 값을 임시로 저장
                 idxBlockDegree = (idxBlockDegree + 1) % 4; // 90도 회전 (0~3 범위 안에서 인덱스 1증가)
                 arrayBlk = setOfBlockArrays[idxBlockType][idxBlockDegree]; // 블록 다시 선택
                 currBlk =  new Matrix(arrayBlk); // currBlk 객체 다시 할당
@@ -277,13 +281,14 @@ public class Main {
                 }
             }
 
-            // space(' ')키를 입력한 경우 블록 추락
+            // space(' ')키를 입력한 경우 블록 추락 (v10)
             if (inputSpace == true) {
                 inputSpace = false;
 
                 // 충돌이 발생할 때까지 블록 한 칸 아래로 이동
                 while (true) {
                     if (tempBlk.anyGreaterThan(1)) {
+                        checkFullLine = true;
                         newBlockNeeded = true;
                         top--;
                         break;
@@ -297,20 +302,51 @@ public class Main {
             tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
             tempBlk = tempBlk.add(currBlk);
 
+
+
+            // 충돌이 발생한 경우
             if (tempBlk.anyGreaterThan(1)) {
                 switch(key) {
                     case 'a': left++; break; // undo: move right
                     case 'd': left--; break; // undo: move left
-                    case 's': top--; newBlockNeeded = true; break; // undo: move up
+                    case 's': top--; newBlockNeeded = true; checkFullLine = true; break; // undo: move up
                     case 'w': break; // undo: rotate the block counter-clockwise
-                    case ' ': break; // undo: move up
+                    case ' ': checkFullLine = true; break; // undo: move up
                 }
+
                 tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
                 tempBlk = tempBlk.add(currBlk);
             }
+
             oScreen = new Matrix(iScreen);
             oScreen.paste(tempBlk, top, left);
+
+            // down 키(s 혹은 space) 입력 후 충돌이 발생했을 경우 full line 체크 (v11)
+            if (checkFullLine == true) {
+//                System.out.println("checkFullLine == true");
+
+                // tempBlk(currBlk)이 영향을 준 라인부터 검사 (맨 아랫 줄부터 검사)
+                for (int i=iScreenDy-1; i>=top; i--) {
+                    // tempBlk(currBlk)이 영향을 준 라인 잘라내기
+                    Matrix fullLineBlk = oScreen.clip(i, iScreenDw, i+1, iScreenDx+iScreenDw);
+
+//                    System.out.println("clip(" + i + ", " + 4 + ", " +((int)i+1) + ", " + (4+(int)iScreenDx) + ")");
+//                    System.out.print("Line (" + i + ") : " + fullLineBlk.sum());
+
+                    if (fullLineBlk.sum() == 10) {
+                        System.out.println(" [ Remove Full Line ] ");
+                        Matrix removedBlk = oScreen.clip(0, iScreenDw, i, iScreenDx+iScreenDw); // 지워질 부분 위부터 자르기
+                        oScreen.paste(removedBlk, 1, iScreenDw); // 지워진 블록을 다시 oScreen에 붙여넣기
+                        i++; // 한 줄이 삭제되었으므로 i는 다시 복구
+                    }
+                }
+
+                checkFullLine = false;
+            }
+
             drawMatrix(oScreen); System.out.println();
+
+
             if (newBlockNeeded) {
                 // 7가지 블록 무작위 선택 (v8)
                 idxBlockType = random.nextInt(7); // 0~6 정수 랜덤 선택
