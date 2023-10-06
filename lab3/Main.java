@@ -219,7 +219,7 @@ public class Main {
         return ch;
     }
 
-    // [v10]까지 구현
+    // [v11]까지 구현
     public static void main(String[] args) throws Exception {
         // Rotate 키 처리: 블록 회전 (v9)
         boolean rotateNeeded = false; // rotate(w) 키가 입력되었을 경우 true
@@ -233,8 +233,7 @@ public class Main {
         boolean inputSpace = false; // space 키가 입력되었을 경우 true
 
         // Full line 삭제 처리 (v11)
-        boolean inputS = false; // down 키가 입력되었을 경우 true
-        boolean checkFullLine = false;
+        boolean checkFullLine = false; // down (s 혹은 space) 키가 입력되었을 경우 true
 
         boolean newBlockNeeded = false;
         int top = 0;
