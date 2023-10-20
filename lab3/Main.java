@@ -188,11 +188,13 @@ public class Main {
         return array;
     }
     public static void drawMatrix(Matrix m) {
+        // 벽 두께가 1칸만 보이도록 변경
         int dy = m.get_dy();
         int dx = m.get_dx();
+        int dw = iScreenDw;
         int array[][] = m.get_array();
-        for (int y=0; y < dy; y++) {
-            for (int x=0; x < dx; x++) {
+        for (int y=0; y < dy-dw+1; y++) {
+            for (int x=dw-1; x < dx-dw+1; x++) {
                 if (array[y][x] == 0) System.out.print("□ ");
                 else if (array[y][x] == 1) System.out.print("■ ");
                 else System.out.print("X ");
@@ -205,17 +207,23 @@ public class Main {
     private static int nKeys = 0;
     private static char getKey() throws IOException {
         char ch;
+        // nKeys != 0 이라는 뜻은, 버퍼에 읽을 값이 있다는 뜻이다.
+        // 만일, 이전에 사용자가 입력한 문자의 길이가 2이상이라면, 버퍼에 문자가 남아있을 것이다.
+        // 그러면, line의 길이는 그대로지만 nKeys는 줄어들기 때문에 남은 문자들을 하나씩 읽어올 수 있는 것이다.
         if (nKeys != 0) {
             ch = line.charAt(line.length() - nKeys);
             nKeys--;
             return ch;
         }
+
         do {
-            line = br.readLine();
-            nKeys = line.length();
-        } while (nKeys == 0);
+            line = br.readLine(); // 사용자로부터 문자열을 입력받는다.
+            nKeys = line.length(); // nKeys를 문자열의 길이로 지정한다.
+        } while (nKeys == 0); // 버퍼에 읽을 문자가 없다면(nKeys == 0) 또 다시 do를 실행한다. (사용자가 공백을 입력한 경우)
+
         ch = line.charAt(0);
         nKeys--;
+
         return ch;
     }
 
@@ -240,9 +248,7 @@ public class Main {
         int left = iScreenDw + iScreenDx/2 - 2;
         int[][] arrayScreen = createArrayScreen(iScreenDy, iScreenDx, iScreenDw);
         char key;
-
-
-
+        
         Matrix iScreen = new Matrix(arrayScreen);
         Matrix currBlk = new Matrix(arrayBlk);
         Matrix tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
