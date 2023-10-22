@@ -67,7 +67,7 @@ public class Main {
         System.out.println("Arrays.equals(A2, A4)=" + Arrays.equals(A2, A4));
     }
 
-    public static void printArray(int a[]) {
+    public static void printArray(int[] a) {
         if (a != null) {
             for (int i = 0; i < a.length; i++)
                 System.out.print(a[i] + " ");

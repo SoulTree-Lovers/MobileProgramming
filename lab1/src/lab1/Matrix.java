@@ -104,8 +104,8 @@ public class Matrix {
         return temp;
     }
     public boolean anyGreaterThan(int val){
-        for(int y = 0; y < array.length; y++){
-            for(int x = 0; x < array[0].length ; x++){
+        for(int y = 0; y < array.length; y++){ // array.length는 dy와 동일
+            for(int x = 0; x < array[0].length ; x++){ // array[0].length는 dx와 동일
                 if (array[y][x] > val) return true;
             }
         }

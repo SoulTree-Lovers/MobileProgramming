@@ -43,15 +43,15 @@ class OnNewBlock implements ActionHandler {
         t.left = t.iScreenDw + t.iScreenDx/2 - (t.currBlk.get_dx()+1)/2;
     }
     private Matrix deleteFullLines(Matrix screen, Matrix blk, int top, int dy, int dx, int dw) throws Exception {
-        Matrix line, zero, temp;
-        if (blk == null) return screen;
-        int cy, y, nDeleted = 0,nScanned = blk.get_dy();
+        Matrix line, zero, temp; // line: 한 줄을 잘라 만든 객체, zero: 한 줄짜리 빈 객체, temp: 삭제되지 않은 윗 부분의 배경 객체
+        if (blk == null) return screen; // 테스트용 코드: blk가 null이면 화면을 그대로 리턴
+        int cy, y, nDeleted = 0, nScanned = blk.get_dy();
         if (top + blk.get_dy() - 1 >= dy)
             nScanned -= (top + blk.get_dy() - dy);
         zero = new Matrix(1, dx);
         for (y = nScanned - 1; y >= 0 ; y--) {
-            cy = top + y + nDeleted;
-            line = screen.clip(cy, 0, cy + 1, screen.get_dx());
+            cy = top + y + nDeleted; // cy: 현재 처리 중인 y좌표
+            line = screen.clip(cy, 0, cy + 1, screen.get_dx()); // screen.get_dx() 대신 dx로 써도 됨.
             if (line.sum() == screen.get_dx()) {
                 temp = screen.clip(0, 0, cy, screen.get_dx());
                 screen.paste(temp, 1, 0);

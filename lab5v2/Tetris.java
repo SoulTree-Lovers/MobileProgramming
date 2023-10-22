@@ -74,12 +74,14 @@ class OnNewBlock implements ActionHandler {
     }
     private Matrix deleteFullLines(Matrix screen, Matrix blk, int top, int dy, int dx, int dw) throws Exception {
         Matrix line, zero, temp;
+        int cy, y, nDeleted = 0, nScanned = blk.get_dy();
+        zero = new Matrix(1, dx);
         if (blk == null) // called right after the game starts.
             return screen; // no lines to be deleted
-        int cy, y, nDeleted = 0, nScanned = blk.get_dy();
+
         if (top + blk.get_dy() - 1 >= dy)
             nScanned -= (top + blk.get_dy() - dy);
-        zero = new Matrix(1, dx);
+
         for (y = nScanned - 1; y >= 0; y--) {
             cy = top + y + nDeleted;
             line = screen.clip(cy, 0, cy + 1, screen.get_dx());
@@ -146,10 +148,10 @@ public class Tetris {
             hDo = h1;  hUndo = h2;
             preState = s0;  postStateWDo = s1;  postStateWUndo = s2;
         }
-    };
+    }
     private static final int MAX_TET_OPS = 100;
     private static int nops;
-    private static TetrisOperation operations[] = new TetrisOperation[MAX_TET_OPS];
+    private static TetrisOperation[] operations = new TetrisOperation[MAX_TET_OPS];
     private static int findOperationByKey(char key) {
         for (int id = 0; operations[id] != null; id++) {
             if (operations[id].key == key) {

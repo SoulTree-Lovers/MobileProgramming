@@ -184,6 +184,7 @@ public class Main {
         TetrisState state;
         Tetris.init(setOfBlockArrays);
 
+        // myOn~~ 객체를 새로 만들어서 플러그인 구조로 설계
         OnLeft myOnLeft = new OnLeft() {
             public void run(Tetris t, char key) throws Exception { t.left = t.left - 1; }
         };
@@ -222,13 +223,20 @@ public class Main {
                 Matrix line, zero, temp;
                 if (blk == null) return screen;
                 int cy, y, nDeleted = 0,nScanned = blk.get_dy();
-                if (top + blk.get_dy() - 1 >= dy)
+//                System.out.println("top, dy, dx, blk.get_dy() "+ top + ", " + dy+ ", " + dx + ", "+ blk.get_dy());
+
+                // 블록의 공백 부분이 바닥 벽을 침범했을 경우, 그 부분은 스캔하지 않도록 하기 위한 코드
+                if (top + blk.get_dy() - 1 >= dy) {
+//                    System.out.println("전 nScanned: " + nScanned);
                     nScanned -= (top + blk.get_dy() - dy);
+//                    System.out.println("후 nScanned: " + nScanned);
+                }
+
                 zero = new Matrix(1, dx);
                 for (y = nScanned - 1; y >= 0 ; y--) {
-                    cy = top + y + nDeleted;
-                    line = screen.clip(cy, 0, cy + 1, screen.get_dx());
-                    if (line.sum() == screen.get_dx()) {
+                    cy = top + y + nDeleted; // 현재 스캔할 y좌표
+                    line = screen.clip(cy, 0, cy + 1, screen.get_dx()); // 현재 y좌표를 기준으로 아래로 한 줄 자르기
+                    if (line.sum() == screen.get_dx()) { // 만약 줄이 꽉 찼다면, 해당 줄 제거
                         temp = screen.clip(0, 0, cy, screen.get_dx());
                         screen.paste(temp, 1, 0);
                         screen.paste(zero, 0, dw);
@@ -243,6 +251,8 @@ public class Main {
                 System.out.println("OnFinished.run() called");
             }
         };
+
+        // myOn~~를 Tetris 클래스 메소드를 통해 플러그인 (run method의 body 교체)
         Tetris.setOnLeftListener(myOnLeft);
         Tetris.setOnRightListener(myOnRight);
         Tetris.setOnDownListener(myOnDown);
