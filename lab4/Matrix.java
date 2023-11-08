@@ -92,6 +92,15 @@ public class Matrix {
         }
         return false;
     }
+    public Matrix int2bool() throws Exception {
+        Matrix temp = new Matrix(dy, dx);
+        for (int y=0; y<dy; y++) {
+            for (int x=0; x<dx; x++) {
+                if (array[y][x] != 0) {temp.array[y][x] = 1;}
+            }
+        }
+        return temp;
+    }
     public void print(){
         System.out.println("Matrix(" + dy + "," + dx + ")");
         for(int y = 0; y < dy; y++) {

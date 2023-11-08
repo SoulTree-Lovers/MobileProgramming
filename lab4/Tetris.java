@@ -6,15 +6,26 @@ enum TetrisState {
 }
 
 public class Tetris {
-    private static int iScreenDw;		// large enough to cover the largest block
-    private static int nBlockTypes;		// number of block types (typically 7)
-    private static int nBlockDegrees;	// number of block degrees (typically 4)
-    private static Matrix[][] setOfBlockObjects;	// Matrix object arrays of all blocks
-    private static Matrix[][] createSetOfBlocks(int[][][][] setOfArrays) throws Exception {
-        return null;
+    protected static int iScreenDw;		// large enough to cover the largest block
+    protected static int nBlockTypes;		// number of block types (typically 7)
+    protected static int nBlockDegrees;	// number of block degrees (typically 4)
+    protected static Matrix[][] setOfBlockObjects;	// Matrix object arrays of all blocks
+    protected static Matrix[][] createSetOfBlocks(int[][][][] setOfArrays, boolean color) throws Exception {
+        int ntypes = setOfArrays.length;
+        int ndegrees = setOfArrays[0].length;
+        Matrix[][] setOfObjects = new Matrix[nBlockTypes][nBlockDegrees];
+        for (int t = 0; t < ntypes; t++) {
+            for (int d = 0; d < ndegrees; d++) {
+                setOfObjects[t][d] = new Matrix(setOfArrays[t][d]);
+                if (color == false) {
+                    setOfObjects[t][d] = setOfObjects[t][d].int2bool();
+                }
+            }
+        }
+        return setOfObjects;
     }
-    private static int max(int a, int b) { return (a > b ? a : b); }
-    private static int findLargestBlockSize(int[][][][] setOfArrays) {
+    protected static int max(int a, int b) { return (a > b ? a : b); }
+    protected static int findLargestBlockSize(int[][][][] setOfArrays) {
         int size, max_size = 0;
         for (int t = 0; t < nBlockTypes; t++) {
             for (int d = 0; d < nBlockDegrees; d++) {
@@ -28,23 +39,23 @@ public class Tetris {
     public static void init(int[][][][] setOfBlockArrays) throws Exception { // initialize static variables
         nBlockTypes = setOfBlockArrays.length;
         nBlockDegrees = setOfBlockArrays[0].length;
-        setOfBlockObjects = createSetOfBlocks(setOfBlockArrays);
+        setOfBlockObjects = createSetOfBlocks(setOfBlockArrays, false);
         iScreenDw = findLargestBlockSize(setOfBlockArrays);
     }
-    private int iScreenDy;	// height of the background screen (excluding walls)
-    private int iScreenDx;  // width of the background screen (excluding walls)
-    private TetrisState state;		// game state
-    private int top;		// y of the top left corner of the current block
-    private int left;		// x of the top left corner of the current block
-    private Matrix iScreen;	// input screen (as background)
-    private Matrix oScreen;	// output screen
+    protected int iScreenDy;	// height of the background screen (excluding walls)
+    protected int iScreenDx;  // width of the background screen (excluding walls)
+    protected TetrisState state;		// game state
+    protected int top;		// y of the top left corner of the current block
+    protected int left;		// x of the top left corner of the current block
+    protected Matrix iScreen;	// input screen (as background)
+    protected Matrix oScreen;	// output screen
 	public Matrix get_oScreen() {
 		return oScreen;
 	}
-    private Matrix currBlk;	// current block
-    private int idxBlockType;	// index for the current block type
-    private int idxBlockDegree; // index for the current block degree
-    private int[][] createArrayScreen(int dy, int dx, int dw) {
+    protected Matrix currBlk;	// current block
+    protected int idxBlockType;	// index for the current block type
+    protected int idxBlockDegree; // index for the current block degree
+    protected int[][] createArrayScreen(int dy, int dx, int dw) {
         int y, x;
         int[][] array = new int[dy + dw][dx + 2*dw];
         for (y = 0; y < array.length; y++)
@@ -71,7 +82,26 @@ public class Tetris {
             System.out.println();
         }
     }
-    private Matrix deleteFullLines(Matrix screen, Matrix blk, int top, int dy, int dx, int dw) throws Exception {
+    protected Matrix deleteFullLines(Matrix screen, Matrix blk, int top, int dy, int dx, int dw) throws Exception {
+        Matrix line, zero, temp;
+        if (blk == null) // called right after the game starts.
+            return screen; // no lines to be deleted
+        int cy, y, nDeleted = 0, nScanned = blk.get_dy();
+        zero = new Matrix(1, dx);
+
+        if (top + blk.get_dy() - 1 >= dy)
+            nScanned -= (top + blk.get_dy() - dy);
+
+        for (y = nScanned - 1; y >= 0; y--) {
+            cy = top + y + nDeleted;
+            line = screen.clip(cy, 0, cy + 1, screen.get_dx());
+            if (line.int2bool().sum() == screen.get_dx()) {
+                temp = screen.clip(0, 0, cy, screen.get_dx());
+                screen.paste(temp, 1, 0);
+                screen.paste(zero, 0, dw);
+                nDeleted++;
+            }
+        }
         return screen;
     }
     public void printScreen() {	Matrix screen = oScreen; // copied from oScreen
@@ -106,9 +136,7 @@ public class Tetris {
             state = TetrisState.Running;
             idxBlockType = key - '0'; // copied from key
             idxBlockDegree = 0;
-            //currBlk = setOfBlockObjects[idxBlockType][idxBlockDegree];
-            int[][] array = { { 0, 1, 0 }, { 1, 1, 1 }, { 0, 0, 0 } };
-            currBlk = new Matrix(array);
+            currBlk = setOfBlockObjects[idxBlockType][idxBlockDegree];
             top = 0;
             left = iScreenDw + iScreenDx / 2 - (currBlk.get_dx()+1) / 2;
             tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());

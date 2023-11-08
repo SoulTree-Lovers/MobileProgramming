@@ -191,23 +191,42 @@ public class Main {
             System.out.println();
         }
     }
+    public static void drawCMatrix(Matrix m) {
+        int dy = m.get_dy();
+        int dx = m.get_dx();
+        int array[][] = m.get_array();
+        for (int y=0; y < dy; y++) {
+            for (int x=0; x < dx; x++) {
+                if (array[y][x] == 0) System.out.print("□ ");
+                else if (array[y][x] == 10) System.out.print("♤ ");
+                else if (array[y][x] == 20) System.out.print("♧ ");
+                else if (array[y][x] == 30) System.out.print("♡ ");
+                else if (array[y][x] == 40) System.out.print("♢ ");
+                else if (array[y][x] == 50) System.out.print("♔ ");
+                else if (array[y][x] == 60) System.out.print("♕ ");
+                else if (array[y][x] == 70) System.out.print("♖ ");
+                else System.out.print("X ");
+            }
+            System.out.println();
+        }
+    }
     public static void main(String[] args) throws Exception {
         char key;
         TetrisState state;
-        Tetris.init(setOfBlockArrays);
-        Tetris board = new Tetris(15, 10);
+        CTetris.init(setOfBlockArrays);
+        CTetris board = new CTetris(15, 10);
         Random random = new Random();
         key = (char) ('0' + random.nextInt(7));
         board.accept(key);
-        drawMatrix(board.get_oScreen()); System.out.println();
+        drawCMatrix(board.get_oCScreen()); System.out.println();
 
         while ((key = getKey()) != 'q') {
             state = board.accept(key);
-            drawMatrix(board.get_oScreen()); System.out.println();
+            drawCMatrix(board.get_oCScreen()); System.out.println();
             if (state == TetrisState.NewBlock) {
                 key = (char) ('0' + random.nextInt(7));
                 state = board.accept(key);
-                drawMatrix(board.get_oScreen()); System.out.println();
+                drawCMatrix(board.get_oCScreen()); System.out.println();
                 if (state == TetrisState.Finished) break; // Game Over!
             }
         }
