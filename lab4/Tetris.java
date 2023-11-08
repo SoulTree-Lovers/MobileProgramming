@@ -129,7 +129,7 @@ public class Tetris {
         oScreen = new Matrix(iScreen);
     }
     public TetrisState accept(char key) throws Exception {
-        Matrix tempBlk;
+        Matrix tempBlk = new Matrix();
         if (state == TetrisState.NewBlock) {
             oScreen = deleteFullLines(oScreen, currBlk, top, iScreenDy, iScreenDx, iScreenDw);
             iScreen.paste(oScreen, 0, 0);
@@ -154,8 +154,8 @@ public class Tetris {
             case 'a': left--; break; // move left
             case 'd': left++; break; // move right
             case 's': top++; break; // move down
-            case 'w': break; // rotateCW
-            case ' ': break; // drop the block
+            case 'w': rotateCW(); break; // rotateCW
+            case ' ': drop(tempBlk); break; // drop the block
             default: System.out.println("unknown key!");
         }
         tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
@@ -165,8 +165,8 @@ public class Tetris {
                 case 'a': left++; break; // undo: move right
                 case 'd': left--; break; // undo: move left
                 case 's': top--; state = TetrisState.NewBlock; break; // undo: move up
-                case 'w': break; // undo: rotateCCW
-                case ' ': break; // undo: move up
+                case 'w': rotateCCW(); break; // undo: rotateCCW
+                case ' ': unDoDrop(); break; // undo: move up
             }
             tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
             tempBlk = tempBlk.add(currBlk);
@@ -177,6 +177,29 @@ public class Tetris {
         return state;
         // if (newBlockNeeded) { ... }
         // } end of while
+    }
+
+    private void rotateCW() {
+        idxBlockDegree = (idxBlockDegree + 1) % nBlockDegrees;
+        currBlk = setOfBlockObjects[idxBlockType][idxBlockDegree];
+    }
+
+    private void rotateCCW() {
+        idxBlockDegree = (idxBlockDegree + nBlockDegrees - 1) % nBlockDegrees;
+        currBlk = setOfBlockObjects[idxBlockType][idxBlockDegree];
+    }
+
+    private void drop(Matrix tempBlk) throws Exception {
+        do {
+            top++;
+            tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
+            tempBlk = tempBlk.add(currBlk);
+        } while (tempBlk.anyGreaterThan(1) == false);
+    }
+
+    private void unDoDrop() {
+        top--;
+        state = TetrisState.NewBlock;
     }
 }
 
