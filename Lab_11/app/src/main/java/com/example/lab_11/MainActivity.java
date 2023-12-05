@@ -67,14 +67,27 @@ public class MainActivity extends AppCompatActivity {
         public int value() { return value; }
     }
     int stateTransMatrix[][] = { // stateTransMatrix[currGameState][GameCommand] --> nextGameState
-            { -1, 1, -1, -1, -1, 2 },  // [Initial][Start] --> Running
+            { -1, 1, -1, -1, -1, 2 },
+            // [Initial][Quit] --> Error
+            // [Initial][Start] --> Running
+            // [Initial][Pause] --> Error
+            // [Initial][Resume] --> Error
+            // [Initial][Update] --> Error
             // [Initial][Recover] --> Paused
-            { 0, -1, 2, -1, 1, -1 },    // [Running][Quit] --> Initial,
-            // [Running][Pause] --> Paused,
-            // [Running][Update] --> Running,
-            { 0, 1, -1, 1, 2, -1 },     // [Paused][Quit] --> Initial
-            // [Paused][Start,Resume] --> Running
+            { 0, -1, 2, -1, 1, -1 },
+            // [Running][Quit] --> Initial
+            // [Running][Start] --> Error
+            // [Running][Pause] --> Paused
+            // [Running][Resume] --> Error
+            // [Running][Update] --> Running
+            // [Running][Recover] --> Error
+            { 0, 1, -1, 1, 2, -1 },
+            // [Paused][Quit] --> Initial
+            // [Paused][Start] --> Running
+            // [Paused][Pause] --> Error
+            // [Paused][Resume] --> Running
             // [Paused][Update] --> Paused
+            // [Paused][Recover] --> Error
     };
     private void executeCommand(GameCommand cmd, char key) {
         GameState newState = GameState.stateFromInteger(stateTransMatrix[gameState.value()][cmd.value()]);
@@ -238,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
             if (gameState == GameState.Running) {
                 updateModel('s');
                 Log.d("MainActivity", "ondraws="+myTetView.ondraw_calls);
-                handler4Timer.postDelayed(this, 1000);
+                handler4Timer.postDelayed(this, 1000); // runnableTimer 객체를 재귀적으로 handler4Timer에게 전송
             }
         }
     };
