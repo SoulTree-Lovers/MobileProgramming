@@ -1,6 +1,8 @@
 package com.example.jtetris;
 
-public class JTetris {
+import java.io.Serializable;
+
+public class JTetris implements Serializable {
     public enum TetrisState { // need to be defined as inner class within Tetris, otherwise requires a separate Java file.
         Running(0), NewBlock(1), Finished(2);
         private final int value;

@@ -1,6 +1,8 @@
 package com.example.jtetris;
 
-public class Matrix {
+import java.io.Serializable;
+
+public class Matrix implements Serializable {
     private static int nAlloc = 0;
     private static int nFree = 0;
     protected void finalize() throws Throwable {
