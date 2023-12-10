@@ -88,13 +88,25 @@ public class Matrix implements Serializable {
             for(int x = 0; x < dx; x++)
                 array[y][x] = coef * array[y][x];
     }
-    public boolean anyGreaterThan(int val){
+
+    public boolean anyGreaterThan(int val) throws Exception {
         for(int y = 0; y < array.length; y++){
             for(int x = 0; x < array[0].length ; x++){
                 if (array[y][x] > val) return true;
             }
         }
         return false;
+    }
+    public Matrix int2bool() throws Exception {
+        Matrix temp = new Matrix(dy, dx);
+        for (int y=0; y<dy; y++) {
+            for (int x=0; x<dx; x++) {
+                if (array[y][x] != 0) {
+                    temp.array[y][x] = 1;
+                }
+            }
+        }
+        return temp;
     }
     public void print(){
         System.out.println("Matrix(" + dy + "," + dx + ")");

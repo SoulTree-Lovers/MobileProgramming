@@ -13,6 +13,12 @@ public class JTetris implements Serializable {
     public static int nBlockTypes;		// number of block types (typically 7)
     public static int nBlockDegrees;	// number of block degrees (typically 4)
     public static Matrix[][] setOfBlockObjects;	// Matrix object arrays of all blocks
+
+    private Matrix currCBlk;
+    private Matrix iCScreen;
+    private Matrix oCScreen;
+    private static Matrix[][] setOfCBlockObjects;
+
     private static Matrix[][] createSetOfBlocks(int[][][][] setOfArrays) throws Exception {
         int ntypes = setOfArrays.length;
         int ndegrees = setOfArrays[0].length;
@@ -39,6 +45,8 @@ public class JTetris implements Serializable {
         nBlockDegrees = setOfBlockArrays[0].length;
         setOfBlockObjects = createSetOfBlocks(setOfBlockArrays);
         iScreenDw = findLargestBlockSize(setOfBlockArrays);
+
+        setOfCBlockObjects = createSetOfBlocks(setOfBlockArrays);
     }
     private int iScreenDy;	// height of the background screen (excluding walls)
     private int iScreenDx;  // width of the background screen (excluding walls)
@@ -74,7 +82,9 @@ public class JTetris implements Serializable {
         for (int y=0; y < dy; y++) {
             for (int x=0; x < dx; x++) {
                 if (array[y][x] == 0) System.out.print("□ ");
-                else if (array[y][x] == 1) System.out.print("■ ");
+                else if (array[y][x] == 10) System.out.print("💎 ");
+                else if (array[y][x] == 20) System.out.print("💍 ");
+                else if (array[y][x] == 30) System.out.print("👑 ");
                 else System.out.print("XX ");
             }
             System.out.println();
@@ -83,14 +93,14 @@ public class JTetris implements Serializable {
     private Matrix deleteFullLines(Matrix screen, Matrix blk, int top, int dy, int dx, int dw) throws Exception {
         Matrix line, zero, temp;
         if (blk == null) return screen; // called right after the game starts!!
-        int cy, y, nDeleted = 0,nScanned = blk.get_dy();
+        int cy, y, nDeleted = 0, nScanned = blk.get_dy();
         if (top + blk.get_dy() - 1 >= dy)
             nScanned -= (top + blk.get_dy() - dy);
         zero = new Matrix(1, dx);
         for (y = nScanned - 1; y >= 0 ; y--) {
             cy = top + y + nDeleted;
             line = screen.clip(cy, 0, cy + 1, screen.get_dx());
-            if (line.sum() == screen.get_dx()) {
+            if (line.int2bool().sum() == screen.get_dx()) {
                 temp = screen.clip(0, 0, cy, screen.get_dx());
                 screen.paste(temp, 1, 0);
                 screen.paste(zero, 0, dw);
@@ -122,9 +132,33 @@ public class JTetris implements Serializable {
         state = TetrisState.NewBlock;	// The game should start with a new block needed!
         iScreen = new Matrix(arrayScreen);
         oScreen = new Matrix(iScreen);
+//        iCScreen = new Matrix(arrayScreen);
+//        oCScreen = new Matrix(iCScreen);
     }
+
+//    private Matrix deleteColorFullLines(Matrix oCScreen, Matrix currCBlk, int top, int iScreenDw) throws Exception {
+//        return deleteFullLines(oCScreen, currCBlk, top, iScreenDy, iScreenDx, iScreenDw);
+//    }
+//    public Matrix get_oCScreen() {
+//        return oCScreen;
+//    }
+//    public TetrisState accept(char key) throws Exception {
+//        Matrix tempBlk, tempBlk2;
+//        TetrisState _state = acceptOriginal(key);
+//        currCBlk = setOfCBlockObjects[idxBlockType][idxBlockDegree];
+//        tempBlk = iCScreen.clip(top, left, top + currCBlk.get_dy(), left + currCBlk.get_dx());
+//        tempBlk2 = tempBlk.add(currCBlk);
+//        oCScreen.paste(iCScreen, 0, 0);
+//        oCScreen.paste(tempBlk2, top, left);
+//        if (_state == TetrisState.NewBlock) {
+//            oCScreen = deleteColorFullLines(oCScreen, currCBlk, top, iScreenDw);
+//            iCScreen.paste(oCScreen, 0, 0);
+//        }
+//        return _state;
+//    }
     public TetrisState accept(char key) throws Exception {
         Matrix tempBlk;
+        Matrix tempBlk2, tempCurrBlk;
         if (state == TetrisState.NewBlock) {
             oScreen = deleteFullLines(oScreen, currBlk, top, iScreenDy, iScreenDx, iScreenDw);
             iScreen.paste(oScreen, 0, 0);
@@ -135,10 +169,19 @@ public class JTetris implements Serializable {
             top = 0;
             left = iScreenDw + iScreenDx / 2 - (currBlk.get_dx()+1) / 2;
             tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
+
+
+            // 0보다 큰 원소를 1로 변경한 후 충돌 테스트
+            tempBlk2 = tempBlk.int2bool();
+            tempCurrBlk = currBlk.int2bool();
+            tempBlk2 = tempBlk2.add(tempCurrBlk);
+
             tempBlk = tempBlk.add(currBlk);
+
             oScreen.paste(iScreen, 0, 0);
             oScreen.paste(tempBlk, top, left); System.out.println();
-            if (tempBlk.anyGreaterThan(1)) {
+
+            if (tempBlk2.anyGreaterThan(1)) {
                 state = TetrisState.Finished;	// System.out.println("Game Over!");
                 return state;	// System.exit(0);
             }
@@ -155,16 +198,35 @@ public class JTetris implements Serializable {
                 break;
             case ' ': // drop the block
                 do {
+                    tempBlk2 = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
+                    tempBlk2 = tempBlk2.int2bool();
+                    tempBlk2.print();
+                    if (tempBlk2.anyGreaterThan(1)) {
+                        break;
+                    }
                     top++;
                     tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
-                    tempBlk = tempBlk.add(currBlk);
-                } while (tempBlk.anyGreaterThan(1) == false);
+
+                    // 0보다 큰 원소를 1로 변경한 후 충돌 테스트
+                    tempBlk2 = tempBlk.int2bool();
+                    tempCurrBlk = currBlk.int2bool();
+                    tempBlk2 = tempBlk2.add(tempCurrBlk);
+
+                } while (tempBlk2.anyGreaterThan(1) == false);
                 break;
             default: System.out.println("unknown key!");
         }
         tempBlk = iScreen.clip(top, left, top+currBlk.get_dy(), left+currBlk.get_dx());
+
+
+        // 0보다 큰 원소를 1로 변경한 후 충돌 테스트
+        tempBlk2 = tempBlk.int2bool();
+        tempCurrBlk = currBlk.int2bool();
+        tempBlk2 = tempBlk2.add(tempCurrBlk);
+
         tempBlk = tempBlk.add(currBlk);
-        if (tempBlk.anyGreaterThan(1)) {
+
+        if (tempBlk2.anyGreaterThan(1)) {
             switch(key) {
                 case 'a': left++; break; // undo: move right
                 case 'd': left--; break; // undo: move left
