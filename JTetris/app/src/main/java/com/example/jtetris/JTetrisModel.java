@@ -21,7 +21,7 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
     }
     public JTetris.TetrisState accept(char ch) throws Exception { return board.accept(ch); }
 
-    private int[][][][] setOfBlockArrays = { // [4][6][3][3] 10: A, 20: B, 30: C
+    private int[][][][] setOfBlockArrays = { // [8][3][3][3] 10: A, 20: B, 30: C
             // A와 B만 나오는 경우 1 (A 1개, B 2개)
             {
                     {

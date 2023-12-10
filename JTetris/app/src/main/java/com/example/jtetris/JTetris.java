@@ -109,6 +109,87 @@ public class JTetris implements Serializable {
         }
         return screen;
     }
+    // 같은 모양의 연속된 보석 블록 0으로 변경하는 함수
+    private Matrix removeMatchingGems(Matrix screen) {
+        for (int y = 0; y < screen.get_dy() - iScreenDw; y++) {
+            for (int x = iScreenDw; x < screen.get_dx() - iScreenDw; x++) {
+                int gemType = screen.get_array()[y][x];
+                if (gemType != 0) {
+                    int count = 1;
+                    // 같은 모양의 연속된 보석 블록 검사 (가로 방향)
+                    while (x + count < screen.get_dx() - iScreenDw && screen.get_array()[y][x + count] == gemType) {
+                        count++;
+                    }
+                    if (count >= 3) {
+                        // 3개 이상의 보석이 연속된 경우 0으로 변경
+                        for (int i = 0; i < count; i++) {
+                            screen.get_array()[y][x + i] = 0;
+                        }
+                    }
+
+                    count = 1;
+                    // 같은 모양의 연속된 보석 블록 검사 (세로 방향)
+                    while (y + count < screen.get_dy() && screen.get_array()[y + count][x] == gemType) {
+                        count++;
+                    }
+                    if (count >= 3) {
+                        // 3개 이상의 보석이 연속된 경우 0으로 변경
+                        for (int i = 0; i < count; i++) {
+                            screen.get_array()[y + i][x] = 0;
+                        }
+                    }
+                }
+            }
+        }
+        return screen;
+    }
+
+    // 맨 아래 줄부터 0을 그 윗 줄 원소로 바꾸는 함수
+    private Matrix fillBlank(Matrix screen) {
+        for (int x = iScreenDw; x < screen.get_dx() - iScreenDw; x++) {
+            int emptyCount = 0;
+            for (int y = screen.get_dy() - iScreenDw - 1; y >= 0; y--) {
+                if (screen.get_array()[y][x] == 0) {
+                    emptyCount++;
+                } else if (emptyCount > 0) {
+                    // 현재 위치에 값이 있고, 바로 아래에 빈 칸이 있는 경우
+                    screen.get_array()[y + emptyCount][x] = screen.get_array()[y][x];
+                    screen.get_array()[y][x] = 0;
+                }
+            }
+        }
+        return screen;
+    }
+
+    // 보드에 3개 이상 연속된 보석이 있는지 여부를 확인하는 함수
+    private boolean hasMatchingGems(Matrix screen) {
+        for (int y = 0; y < screen.get_dy() - iScreenDw; y++) {
+            for (int x = iScreenDw; x < screen.get_dx() - iScreenDw; x++) {
+                int gemType = screen.get_array()[y][x];
+                if (gemType != 0) {
+                    int count = 1;
+                    // 같은 모양의 연속된 보석 블록 검사 (가로 방향)
+                    while (x + count < screen.get_dx() - iScreenDw && screen.get_array()[y][x + count] == gemType) {
+                        count++;
+                    }
+                    if (count >= 3) {
+                        return true; // 3개 이상의 보석이 연속된 경우
+                    }
+
+                    count = 1;
+                    // 같은 모양의 연속된 보석 블록 검사 (세로 방향)
+                    while (y + count < screen.get_dy() && screen.get_array()[y + count][x] == gemType) {
+                        count++;
+                    }
+                    if (count >= 3) {
+                        return true; // 3개 이상의 보석이 연속된 경우
+                    }
+                }
+            }
+        }
+        return false; // 같은 모양의 보석이 3개 미만으로 연속되지 않은 경우
+    }
+
     public void printScreen() {	Matrix screen = oScreen; // copied from oScreen
         int dy = screen.get_dy();
         int dx = screen.get_dx();
@@ -132,35 +213,18 @@ public class JTetris implements Serializable {
         state = TetrisState.NewBlock;	// The game should start with a new block needed!
         iScreen = new Matrix(arrayScreen);
         oScreen = new Matrix(iScreen);
-//        iCScreen = new Matrix(arrayScreen);
-//        oCScreen = new Matrix(iCScreen);
     }
 
-//    private Matrix deleteColorFullLines(Matrix oCScreen, Matrix currCBlk, int top, int iScreenDw) throws Exception {
-//        return deleteFullLines(oCScreen, currCBlk, top, iScreenDy, iScreenDx, iScreenDw);
-//    }
-//    public Matrix get_oCScreen() {
-//        return oCScreen;
-//    }
-//    public TetrisState accept(char key) throws Exception {
-//        Matrix tempBlk, tempBlk2;
-//        TetrisState _state = acceptOriginal(key);
-//        currCBlk = setOfCBlockObjects[idxBlockType][idxBlockDegree];
-//        tempBlk = iCScreen.clip(top, left, top + currCBlk.get_dy(), left + currCBlk.get_dx());
-//        tempBlk2 = tempBlk.add(currCBlk);
-//        oCScreen.paste(iCScreen, 0, 0);
-//        oCScreen.paste(tempBlk2, top, left);
-//        if (_state == TetrisState.NewBlock) {
-//            oCScreen = deleteColorFullLines(oCScreen, currCBlk, top, iScreenDw);
-//            iCScreen.paste(oCScreen, 0, 0);
-//        }
-//        return _state;
-//    }
     public TetrisState accept(char key) throws Exception {
         Matrix tempBlk;
         Matrix tempBlk2, tempCurrBlk;
         if (state == TetrisState.NewBlock) {
-            oScreen = deleteFullLines(oScreen, currBlk, top, iScreenDy, iScreenDx, iScreenDw);
+            do { // 삭제 후에도 같은 모양의 보석이 3개 연속되어 있으면 다시 삭제 수행
+                oScreen = removeMatchingGems(oScreen);
+                oScreen = fillBlank(oScreen);
+            } while (hasMatchingGems(oScreen));
+
+//            oScreen = deleteFullLines(oScreen, currBlk, top, iScreenDy, iScreenDx, iScreenDw);
             iScreen.paste(oScreen, 0, 0);
             state = TetrisState.Running;
             idxBlockType = key - '0'; // copied from key

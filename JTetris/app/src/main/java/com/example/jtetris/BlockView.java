@@ -38,13 +38,13 @@ public class BlockView extends View {
             for (int x = 0; x < array[0].length; x++) {
                 switch(array[y][x]) {
                     case 0: paint.setColor(Color.BLACK); break;
-                    case 10: paint.setColor(Color.GRAY); break;
+                    case 10: paint.setColor(Color.RED); break;
                     case 20: paint.setColor(Color.GREEN); break;
-                    case 30: paint.setColor(Color.CYAN); break;
-                    case 40: paint.setColor(Color.BLUE); break;
-                    case 50: paint.setColor(Color.YELLOW); break;
-                    case 60: paint.setColor(Color.RED); break;
-                    case 70: paint.setColor(Color.MAGENTA); break;
+                    case 30: paint.setColor(Color.BLUE); break;
+//                    case 40: paint.setColor(Color.BLUE); break;
+//                    case 50: paint.setColor(Color.YELLOW); break;
+//                    case 60: paint.setColor(Color.RED); break;
+//                    case 70: paint.setColor(Color.MAGENTA); break;
                     default : paint.setColor(Color.WHITE); break;
                 }
                 if (array[y][x] != 0)
