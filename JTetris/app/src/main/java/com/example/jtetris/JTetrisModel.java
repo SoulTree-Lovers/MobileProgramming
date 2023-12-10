@@ -3,8 +3,8 @@ package com.example.jtetris;
 import java.io.Serializable;
 
 
-public class TetrisModel implements Serializable { // derived from TestMain.java in Lecture 4
-    private Tetris board;
+public class JTetrisModel implements Serializable { // derived from TestMain.java in Lecture 4
+    private JTetris board;
     public boolean isBlockIndex(char key) {
         int nBlks = setOfBlockArrays.length;
         int idx = key - '0';
@@ -15,11 +15,11 @@ public class TetrisModel implements Serializable { // derived from TestMain.java
     }
     public Matrix getBlock(char type) { return board.setOfBlockObjects[type - '0'][0]; }
     public Matrix getScreen() { return board.get_oScreen(); }
-    public TetrisModel(int dy, int dx) throws Exception {
-        Tetris.init(setOfBlockArrays);
-        board = new Tetris(dy, dx);
+    public JTetrisModel(int dy, int dx) throws Exception {
+        JTetris.init(setOfBlockArrays);
+        board = new JTetris(dy, dx);
     }
-    public Tetris.TetrisState accept(char ch) throws Exception { return board.accept(ch); }
+    public JTetris.TetrisState accept(char ch) throws Exception { return board.accept(ch); }
     private int[][][][] setOfBlockArrays = { // [7][4][?][?]
             {
                     {

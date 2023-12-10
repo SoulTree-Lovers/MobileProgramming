@@ -14,7 +14,7 @@
         android:layout_weight="2"
         android:orientation="horizontal" >
 
-        <com.example.lab_11.TetrisView
+        <com.example.jtetris.TetrisView
             android:id="@+id/peerTetrisView"
             android:layout_width="0px"
             android:layout_height="fill_parent"
@@ -29,7 +29,7 @@
             android:layout_weight="1.2"
             android:orientation="vertical">
 
-            <com.example.lab_11.BlockView
+            <com.example.jtetris.BlockView
                 android:id="@+id/myBlockView"
                 android:layout_width="fill_parent"
                 android:layout_height="0px"
@@ -78,7 +78,7 @@
                 android:gravity="center"
                 android:text="X" />
 
-            <com.example.lab_11.BlockView
+            <com.example.jtetris.BlockView
                 android:id="@+id/peerBlockView"
                 android:layout_width="fill_parent"
                 android:layout_height="0px"
@@ -89,7 +89,7 @@
 
         </LinearLayout>
 
-        <com.example.lab_11.TetrisView
+        <com.example.jtetris.TetrisView
             android:id="@+id/myTetrisView"
             android:layout_width="0px"
             android:layout_height="fill_parent"

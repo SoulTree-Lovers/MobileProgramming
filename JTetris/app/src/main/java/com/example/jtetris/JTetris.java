@@ -1,6 +1,6 @@
 package com.example.jtetris;
 
-public class Tetris {
+public class JTetris {
     public enum TetrisState { // need to be defined as inner class within Tetris, otherwise requires a separate Java file.
         Running(0), NewBlock(1), Finished(2);
         private final int value;
@@ -111,9 +111,9 @@ public class Tetris {
             System.out.println();
         }
     }
-    public Tetris(int cy, int cx) throws Exception { // initialize dynamic variables
+    public JTetris(int cy, int cx) throws Exception { // initialize dynamic variables
         if (cy < iScreenDw || cx < iScreenDw)
-            throw new TetrisException("too small screen");
+            throw new JTetrisException("too small screen");
         iScreenDy = cy;
         iScreenDx = cx;
         int[][] arrayScreen = createArrayScreen(iScreenDy, iScreenDx, iScreenDw);
@@ -185,7 +185,7 @@ public class Tetris {
     }
 }
 
-class TetrisException extends Exception {
-    public TetrisException() { super("Tetris Exception"); }
-    public TetrisException(String msg) { super(msg); }
+class JTetrisException extends Exception {
+    public JTetrisException() { super("Tetris Exception"); }
+    public JTetrisException(String msg) { super(msg); }
 }

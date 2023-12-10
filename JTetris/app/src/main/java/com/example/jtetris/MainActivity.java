@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private int servPortNo = 9999;
     private boolean mirrorMode = false;
 
-    private TetrisModel myTetModel, peTetModel;
+    private JTetrisModel myTetModel, peTetModel;
     private Random random;
     private char myCurrBlk, myNextBlk;
     private char peCurrBlk, peNextBlk;
@@ -170,8 +170,8 @@ public class MainActivity extends AppCompatActivity {
             pauseBtn.setText("R"); // 'R' means Resume.
         //[BEGIN] recover random, TetrisView, and BlockView.
         random = new Random();
-        myTetView.init(dy, dx, Tetris.iScreenDw);
-        myBlkView.init(Tetris.iScreenDw);
+        myTetView.init(dy, dx, JTetris.iScreenDw);
+        myBlkView.init(JTetris.iScreenDw);
         //logMatrix(myTetModel.getScreen());
         myTetView.accept(myTetModel.getScreen());
         myBlkView.accept(myTetModel.getBlock(myNextBlk));
@@ -182,19 +182,19 @@ public class MainActivity extends AppCompatActivity {
     }
     private void updateModel(char key) {
         try {
-            Tetris.TetrisState state; // model state
+            JTetris.TetrisState state; // model state
             state = myTetModel.accept(key);
             if (mirrorMode) sendToPeer(key);
             myTetView.accept(myTetModel.getScreen());
-            if (state == Tetris.TetrisState.NewBlock){
+            if (state == JTetris.TetrisState.NewBlock){
                 myCurrBlk = myNextBlk;
-                myNextBlk = (char) ('0' + random.nextInt(Tetris.nBlockTypes));
+                myNextBlk = (char) ('0' + random.nextInt(JTetris.nBlockTypes));
                 state = myTetModel.accept(myCurrBlk);
                 if (mirrorMode) sendToPeer(myNextBlk); // send myNextBlk, not myCurrBlk!!
                 myTetView.accept(myTetModel.getScreen());
                 myBlkView.accept(myTetModel.getBlock(myNextBlk));
                 myBlkView.invalidate();
-                if (state == Tetris.TetrisState.Finished)
+                if (state == JTetris.TetrisState.Finished)
                     executeCommand(GameCommand.Quit, 'Q');
             }
             myTetView.invalidate();
@@ -208,13 +208,13 @@ public class MainActivity extends AppCompatActivity {
         pauseBtn.setText("P"); // 'P' means Pause.
         Toast.makeText(MainActivity.this, "Game Started!", Toast.LENGTH_SHORT).show();
         try {
-            Tetris.TetrisState state; // model state
+            JTetris.TetrisState state; // model state
             random = new Random();
-            myTetModel = new TetrisModel(dy, dx);
-            myTetView.init(dy, dx, Tetris.iScreenDw);
-            myBlkView.init(Tetris.iScreenDw);
-            myCurrBlk = (char) ('0' + random.nextInt(Tetris.nBlockTypes));
-            myNextBlk = (char) ('0' + random.nextInt(Tetris.nBlockTypes));
+            myTetModel = new JTetrisModel(dy, dx);
+            myTetView.init(dy, dx, JTetris.iScreenDw);
+            myBlkView.init(JTetris.iScreenDw);
+            myCurrBlk = (char) ('0' + random.nextInt(JTetris.nBlockTypes));
+            myNextBlk = (char) ('0' + random.nextInt(JTetris.nBlockTypes));
             state = myTetModel.accept(myCurrBlk);
             myTetView.accept(myTetModel.getScreen());
             myBlkView.accept(myTetModel.getBlock(myNextBlk));
@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
         savedState = GameState.stateFromInteger(inState.getInt("savedState")); // 저장된 상태를 가져옴.
         Log.d("MainActivity", "onRestore(gameState="+gameState+",savedState="+savedState+")");
         if (savedState != GameState.Initial) { // 저장된 게임 상태가 Initial이 아니라면, 저장된 모델 복구
-            myTetModel = (TetrisModel) inState.getSerializable("myTetModel"); // 테트리스 모델 복구
+            myTetModel = (JTetrisModel) inState.getSerializable("myTetModel"); // 테트리스 모델 복구
             myCurrBlk = inState.getChar("myCurrBlk"); // 현재 블록 복구
             myNextBlk = inState.getChar("myNextBlk"); // 다음 블록 복구
             executeCommand(GameCommand.Recover, 'C'); // 게임 Recover
@@ -489,10 +489,10 @@ public class MainActivity extends AppCompatActivity {
     }
     private void startPeer() {
         try {
-            Tetris.TetrisState state; // model state
-            peTetModel = new TetrisModel(dy, dx);
-            peTetView.init(dy, dx, Tetris.iScreenDw);
-            peBlkView.init(Tetris.iScreenDw);
+            JTetris.TetrisState state; // model state
+            peTetModel = new JTetrisModel(dy, dx);
+            peTetView.init(dy, dx, JTetris.iScreenDw);
+            peBlkView.init(JTetris.iScreenDw);
             // peCurrBlk is initialized in mirrorPeer().
             // peNextBlk is initialized in mirrorPeer().
             state = peTetModel.accept(peCurrBlk);
@@ -508,7 +508,7 @@ public class MainActivity extends AppCompatActivity {
     }
     private void updatePeer(char key) {
         try {
-            Tetris.TetrisState state; // model state
+            JTetris.TetrisState state; // model state
             if (peTetModel.isBlockIndex(key)) { // key is a block index.
                 peCurrBlk = peNextBlk;
                 peNextBlk = key;
