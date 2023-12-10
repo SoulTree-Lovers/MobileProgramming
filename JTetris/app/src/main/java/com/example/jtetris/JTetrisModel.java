@@ -21,8 +21,8 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
     }
     public JTetris.TetrisState accept(char ch) throws Exception { return board.accept(ch); }
 
-    private int[][][][] setOfJBlockArrays = { // [4][6][3][3] 10: A, 20: B, 30: C
-            // A와 B만 나오는 경우
+    private int[][][][] setOfBlockArrays = { // [4][6][3][3] 10: A, 20: B, 30: C
+            // A와 B만 나오는 경우 1 (A 1개, B 2개)
             {
                     {
                             { 0, 10, 0 },
@@ -38,7 +38,10 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 20, 0 },
                             { 0, 20, 0 },
                             { 0, 10, 0 },
-                    },
+                    }
+            },
+            // A와 B만 나오는 경우 2 (A 2개, B 1개)
+            {
                     {
                             { 0, 20, 0 },
                             { 0, 10, 0 },
@@ -55,7 +58,7 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 20, 0 },
                     }
             },
-            // B와 C만 나오는 경우
+            // B와 C만 나오는 경우 1 (B 1개, C 2개)
             {
                     {
                             { 0, 20, 0 },
@@ -71,7 +74,10 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 30, 0 },
                             { 0, 30, 0 },
                             { 0, 20, 0 },
-                    },
+                    }
+            },
+            // B와 C만 나오는 경우 2 (B 2개, C 1개)
+            {
                     {
                             { 0, 30, 0 },
                             { 0, 20, 0 },
@@ -88,7 +94,7 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 30, 0 },
                     }
             },
-            // C와 A만 나오는 경우
+            // C와 A만 나오는 경우 (C 1개, A 2개)
             {
                     {
                             { 0, 30, 0 },
@@ -104,7 +110,10 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 10, 0 },
                             { 0, 10, 0 },
                             { 0, 30, 0 },
-                    },
+                    }
+            },
+            // C와 A만 나오는 경우 (C 2개, A 1개)
+            {
                     {
                             { 0, 10, 0 },
                             { 0, 30, 0 },
@@ -121,7 +130,7 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 10, 0 },
                     }
             },
-            // A, B, C 모두 나오는 경우
+            // A, B, C 모두 나오는 경우 1
             {
                     {
                             { 0, 10, 0 },
@@ -129,16 +138,6 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 30, 0 },
                     },
                     {
-                            { 0, 10, 0 },
-                            { 0, 30, 0 },
-                            { 0, 20, 0 },
-                    },
-                    {
-                            { 0, 20, 0 },
-                            { 0, 10, 0 },
-                            { 0, 30, 0 },
-                    },
-                    {
                             { 0, 20, 0 },
                             { 0, 30, 0 },
                             { 0, 10, 0 },
@@ -147,6 +146,20 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                             { 0, 30, 0 },
                             { 0, 10, 0 },
                             { 0, 20, 0 },
+                    },
+            },
+            // A, B, C 모두 나오는 경우 2
+            {
+
+                    {
+                            { 0, 10, 0 },
+                            { 0, 30, 0 },
+                            { 0, 20, 0 },
+                    },
+                    {
+                            { 0, 20, 0 },
+                            { 0, 10, 0 },
+                            { 0, 30, 0 },
                     },
                     {
                             { 0, 30, 0 },
@@ -155,7 +168,7 @@ public class JTetrisModel implements Serializable { // derived from TestMain.jav
                     }
             },
     }; // end of arrayBlock
-    private int[][][][] setOfBlockArrays = { // [7][4][?][?]
+    private int[][][][] setOfJBlockArrays = { // [7][4][?][?]
             {
                     {
                             { 0, 0, 10, 0 },
