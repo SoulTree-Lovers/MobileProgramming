@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -47,12 +48,39 @@ public class BlockView extends View {
 //                    case 70: paint.setColor(Color.MAGENTA); break;
                     default : paint.setColor(Color.WHITE); break;
                 }
-                if (array[y][x] != 0)
+                if (array[y][x] == 10) drawRedCircle(canvas, cx, cy);
+                else if (array[y][x] == 20) drawGreenRectangle(canvas, cx, cy);
+                else if (array[y][x] == 30) drawBlueDiamond(canvas, cx, cy);
+                else if (array[y][x] != 0)
                     canvas.drawRect(cx, cy, cx + bx, cy + by, paint);
                 cx += (bx + 5);
             }
             cx = 10 + (blkWidth - array.length)*(bx+5)/2;
             cy += (by + 5);
         }
+
+    }
+
+    private void drawRedCircle(Canvas canvas, float cx, float cy) {
+        float radius = Math.min(bx, by) / 2;
+        paint.setColor(Color.RED);
+        canvas.drawCircle(cx + bx / 2, cy + by / 2, radius, paint);
+    }
+
+    private void drawGreenRectangle(Canvas canvas, float cx, float cy) {
+        paint.setColor(Color.GREEN);
+        canvas.drawRect(cx, cy, cx + bx, cy + by, paint);
+    }
+
+    private void drawBlueDiamond(Canvas canvas, float cx, float cy) {
+        paint.setColor(Color.BLUE);
+        Path path = new Path();
+        path.moveTo(cx + bx / 2, cy);
+        path.lineTo(cx + bx, cy + by / 2);
+        path.lineTo(cx + bx / 2, cy + by);
+        path.lineTo(cx, cy + by / 2);
+        path.lineTo(cx + bx / 2, cy);
+        path.close();
+        canvas.drawPath(path, paint);
     }
 }
