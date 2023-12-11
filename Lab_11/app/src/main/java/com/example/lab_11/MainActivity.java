@@ -1,12 +1,6 @@
-package com.example.jtetris;
+package com.example.lab_11;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
+/* Lab 12 서버 통신까지 구현 완료 */
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,6 +16,17 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Random;
 
 
@@ -34,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private int dy = 25, dx = 15; // screen size
 
     private final int reqCode4SettingActivity = 0;
-    private String servHostName = "255.255.255.255";
+    private String servHostName = "10.27.6.191"; // 로컬 에코 서버 주소
     private int servPortNo = 9999;
     private boolean mirrorMode = false;
 
@@ -61,33 +66,36 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     private enum GameCommand {
-        NOP(-1), Quit(0), Start(1), Pause(2), Resume(3), Update(4), Recover(5);
+        NOP(-1), Quit(0), Start(1), Pause(2), Resume(3), Update(4), Recover(5), Abort(6);
         private final int value;
         private GameCommand(int value) { this.value = value; }
         public int value() { return value; }
     }
     int stateTransMatrix[][] = { // stateTransMatrix[currGameState][GameCommand] --> nextGameState
-            { -1, 1, -1, -1, -1, 2 },
+            { -1, 1, -1, -1, -1, 2, 0 },
             // [Initial][Quit] --> Error
             // [Initial][Start] --> Running
             // [Initial][Pause] --> Error
             // [Initial][Resume] --> Error
             // [Initial][Update] --> Error
             // [Initial][Recover] --> Paused
-            { 0, -1, 2, -1, 1, -1 },
+            // [Initial][Abort] --> Initial
+            { 0, -1, 2, -1, 1, -1, 0 },
             // [Running][Quit] --> Initial
             // [Running][Start] --> Error
             // [Running][Pause] --> Paused
             // [Running][Resume] --> Error
             // [Running][Update] --> Running
             // [Running][Recover] --> Error
-            { 0, 1, -1, 1, 2, -1 },
+            // [Running][Abort] --> Initial
+            { 0, 1, -1, 1, 2, -1, -1 },
             // [Paused][Quit] --> Initial
             // [Paused][Start] --> Running
             // [Paused][Pause] --> Error
             // [Paused][Resume] --> Running
             // [Paused][Update] --> Paused
             // [Paused][Recover] --> Error
+            // [Paused][Abort] --> Error
     };
     private void executeCommand(GameCommand cmd, char key) {
         GameState newState = GameState.stateFromInteger(stateTransMatrix[gameState.value()][cmd.value()]);
@@ -101,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
             case 3: resumeGame(); launchTimer(); break;
             case 4: updateModel(key); break;
             case 5: recoverGame(); break;
+            case 6: abortGame(); break;
             default: Log.d("MainActivity", "unknown command!!!"); break;
         }
     }
@@ -112,19 +121,21 @@ public class MainActivity extends AppCompatActivity {
             switch (id) {
                 case R.id.startBtn: key = 'N';
                     if (gameState == GameState.Initial) cmd = GameCommand.Start;
-                    else if (gameState == GameState.Running) {
-                        // cmd = GameCommand.Quit;
-                        savedState = gameState;
-                        executeCommand(GameCommand.Pause, 'P');
-                        quitBtn.show();
-                        return;
-                    }
-                    else if (gameState == GameState.Paused) {
-                        // cmd = GameCommand.Quit;
-                        savedState = gameState;
-                        quitBtn.show();
-                        return;
-                    }
+                    else if (gameState == GameState.Running) cmd = GameCommand.Quit;
+                    else if (gameState == GameState.Paused) cmd = GameCommand.Quit;
+//                    else if (gameState == GameState.Running) {
+//                        // cmd = GameCommand.Quit;
+//                        savedState = gameState;
+//                        executeCommand(GameCommand.Pause, 'P');
+//                        quitBtn.show();
+//                        return;
+//                    }
+//                    else if (gameState == GameState.Paused) {
+//                        // cmd = GameCommand.Quit;
+//                        savedState = gameState;
+//                        quitBtn.show();
+//                        return;
+//                    }
                     break;
                 case R.id.pauseBtn: key = 'P';
                     if (gameState == GameState.Running) cmd = GameCommand.Pause;
@@ -234,6 +245,11 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "Game Over!", Toast.LENGTH_SHORT).show();
         if (mirrorMode) sendToPeer('Q');
     }
+    private void abortGame() {
+        setButtonsState(); // no argument of flag
+        startBtn.setText("N"); // 'N' means New Game.
+        Toast.makeText(MainActivity.this, "Game Aborted!", Toast.LENGTH_SHORT).show();
+    }
     private void pauseGame() {
         setButtonsState();
         pauseBtn.setText("R");
@@ -320,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
         savedState = GameState.stateFromInteger(inState.getInt("savedState")); // 저장된 상태를 가져옴.
         Log.d("MainActivity", "onRestore(gameState="+gameState+",savedState="+savedState+")");
         if (savedState != GameState.Initial) { // 저장된 게임 상태가 Initial이 아니라면, 저장된 모델 복구
-            myTetModel = (TetrisModel) inState.getSerializable("myTetModel"); // 테트리스 모델 복구
+            myTetModel = (TetrisModel) inState.getSerializable("myTetModel"); // 테트리스 모델 복구 (getSerializable 반환형이 Object라서 TetrisModel로 형변환 필요)
             myCurrBlk = inState.getChar("myCurrBlk"); // 현재 블록 복구
             myNextBlk = inState.getChar("myNextBlk"); // 다음 블록 복구
             executeCommand(GameCommand.Recover, 'C'); // 게임 Recover
@@ -371,7 +387,9 @@ public class MainActivity extends AppCompatActivity {
         dropBtn.setOnClickListener(OnClickListener);
 
         setButtonsState(); // no argument of flag
-        startThread(runnable4LBThread); // launch Loopback Thread
+//        startThread(runnable4LBThread); // launch Loopback Thread
+        startThread(runnable4RecvThread); // launch RecvThread before SendThread
+        startThread(runnable4SendThread); // launch SendThread
     }
     private AlertDialog AlertDialogBtnCreate() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -424,8 +442,50 @@ public class MainActivity extends AppCompatActivity {
         msg.arg1 = key;
         h.sendMessage(msg);
     }
+    // 서버 연결 코드 추가
+    private Socket socket = null;
+    private final int maxWaitingTime = 3000; // 3 seconds
+    private DataOutputStream outStream = null;
+    private DataInputStream inStream = null;
+    private Object socketReady = new Object();
+    private Object inStreamReady = new Object();
+    private void _disconnectServer() {
+        try {
+            if (outStream != null) outStream.close();
+            if (inStream != null) inStream.close();
+            if (socket != null) socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        outStream = null;
+        inStream = null;
+        socket = null;
+    }
+    private void disconnectServer() {
+        synchronized(socketReady) {
+            _disconnectServer();
+        }
+    }
+    private boolean connectServer() {
+        synchronized(socketReady) {
+            try {
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(servHostName, servPortNo), maxWaitingTime);
+                outStream = new DataOutputStream(socket.getOutputStream());
+                inStream = new DataInputStream(socket.getInputStream());
+                synchronized (inStreamReady) {
+                    inStreamReady.notify();
+                }
+                return true;
+            } catch (Exception e) {
+                _disconnectServer();
+                e.printStackTrace();
+                return false;
+            }
+        }
+    }
     public void sendToPeer(char key) {
-        sendMessage(handler4LBThread, 0, key);
+        sendMessage(handler4SendThread, 0, key);
     }
     private Handler handler4LBThread; // handler for Loopback Thread
     private Runnable runnable4LBThread = new Runnable() { // runnable for Loopback Thread
@@ -442,6 +502,62 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
             Looper.loop(); // The message loop runs.
+        }
+    };
+    private Handler handler4SendThread = null; // handler for Loopback Thread
+    private Runnable runnable4SendThread = new Runnable() { // runnable for SendThread
+        @Override
+        public void run() {
+            Looper.prepare(); // The message loop is ready.
+            handler4SendThread = new Handler(Looper.myLooper()) {
+                public void handleMessage(Message msg) {
+                    try {
+                        char key = (char) msg.arg1;
+                        Log.d("SendThread", "key='"+key+"'["+(int) key+"]");
+                        if (key == 'N') {
+                            if (connectServer() == false) {
+                                sendToMain('A'); // issue 'Abort' command
+                                System.out.println("서버 연결 실패");
+                                return;
+                            }
+                        }
+
+                        synchronized(socketReady) {
+                            if (outStream != null) {
+                                Log.d("SendThread", "wrote key='" + key + "'[" + (int) key + "]");
+                                outStream.writeByte(key);
+                                outStream.writeByte('\n');
+                            }
+                        }
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            Looper.loop(); // The message loop runs.
+        }
+    };
+    private Runnable runnable4RecvThread = new Runnable() { // runnable for RecvThread
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    char key;
+                    synchronized (inStreamReady) {
+                        while (inStream == null) inStreamReady.wait();
+                    }
+                    while ((key = (char) inStream.readByte()) != 'Q') {
+                        if (key != '\n') // skip the newline character
+                            sendToMain(key);
+                    }
+                    sendToMain(key); // key == 'Q'
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                disconnectServer();
+            }
         }
     };
     public void sendToMain(char key) {

@@ -1,4 +1,4 @@
-package com.example.jtetris;
+package com.example.lab_11;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,8 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
-import android.util.Log;
-
 
 
 public class TetrisView extends View {

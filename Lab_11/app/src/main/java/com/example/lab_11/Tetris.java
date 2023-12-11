@@ -1,4 +1,4 @@
-package com.example.jtetris;
+package com.example.lab_11;
 
 public class Tetris {
     public enum TetrisState { // need to be defined as inner class within Tetris, otherwise requires a separate Java file.

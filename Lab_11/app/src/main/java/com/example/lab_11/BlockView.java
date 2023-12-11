@@ -1,4 +1,4 @@
-package com.example.jtetris;
+package com.example.lab_11;
 
 import android.content.Context;
 import android.graphics.Canvas;

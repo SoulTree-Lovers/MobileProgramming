@@ -1,4 +1,4 @@
-package com.example.jtetris;
+package com.example.lab_11;
 
 public class Matrix {
     private static int nAlloc = 0;
