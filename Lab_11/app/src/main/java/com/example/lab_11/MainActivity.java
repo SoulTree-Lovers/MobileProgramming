@@ -123,19 +123,6 @@ public class MainActivity extends AppCompatActivity {
                     if (gameState == GameState.Initial) cmd = GameCommand.Start;
                     else if (gameState == GameState.Running) cmd = GameCommand.Quit;
                     else if (gameState == GameState.Paused) cmd = GameCommand.Quit;
-//                    else if (gameState == GameState.Running) {
-//                        // cmd = GameCommand.Quit;
-//                        savedState = gameState;
-//                        executeCommand(GameCommand.Pause, 'P');
-//                        quitBtn.show();
-//                        return;
-//                    }
-//                    else if (gameState == GameState.Paused) {
-//                        // cmd = GameCommand.Quit;
-//                        savedState = gameState;
-//                        quitBtn.show();
-//                        return;
-//                    }
                     break;
                 case R.id.pauseBtn: key = 'P';
                     if (gameState == GameState.Running) cmd = GameCommand.Pause;
@@ -318,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
         rightArrowBtn.setEnabled(defaultFlag);
         downArrowBtn.setEnabled(defaultFlag);
         dropBtn.setEnabled(defaultFlag);
+
         topLeftBtn.setEnabled(false); // always disabled
         topRightBtn.setEnabled(false); // always disabled
     }
