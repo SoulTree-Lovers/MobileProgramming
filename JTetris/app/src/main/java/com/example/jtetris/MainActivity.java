@@ -120,21 +120,21 @@ public class MainActivity extends AppCompatActivity {
             switch (id) {
                 case R.id.startBtn: key = 'N';
                     if (gameState == GameState.Initial) cmd = GameCommand.Start;
-                    else if (gameState == GameState.Running) cmd = GameCommand.Quit;
-                    else if (gameState == GameState.Paused) cmd = GameCommand.Quit;
-//                    else if (gameState == GameState.Running) {
-//                        // cmd = GameCommand.Quit;
-//                        savedState = gameState;
-//                        executeCommand(GameCommand.Pause, 'P');
-//                        quitBtn.show();
-//                        return;
-////                    }
-//                    else if (gameState == GameState.Paused) {
-//                        // cmd = GameCommand.Quit;
-//                        savedState = gameState;
-//                        quitBtn.show();
-//                        return;
-//                    }
+//                    else if (gameState == GameState.Running) cmd = GameCommand.Quit; 디버깅 용도
+//                    else if (gameState == GameState.Paused) cmd = GameCommand.Quit;
+                    else if (gameState == GameState.Running) {
+                        // cmd = GameCommand.Quit;
+                        savedState = gameState;
+                        executeCommand(GameCommand.Pause, 'P');
+                        quitBtn.show();
+                        return;
+                    }
+                    else if (gameState == GameState.Paused) {
+                        // cmd = GameCommand.Quit;
+                        savedState = gameState;
+                        quitBtn.show();
+                        return;
+                    }
                     break;
                 case R.id.pauseBtn: key = 'P';
                     if (gameState == GameState.Running) cmd = GameCommand.Pause;
