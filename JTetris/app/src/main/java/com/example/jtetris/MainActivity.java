@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private int dy = 25, dx = 15; // screen size
 
     private final int reqCode4SettingActivity = 0;
-    private String servHostName = "10.27.6.191"; // 로컬 에코 서버 주소
+    private String servHostName = "10.27.6.191"; // 로컬 에코 서버 주소 (바뀔 수 있음)
     private int servPortNo = 9999;
     private boolean mirrorMode = false;
 
